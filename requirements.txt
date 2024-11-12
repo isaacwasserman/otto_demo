@@ -1,0 +1,5 @@
+streamlit
+waii-sdk-py
+plotly
+pandas
+python-dotenv
