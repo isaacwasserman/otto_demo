@@ -16,7 +16,8 @@ dotenv.load_dotenv()
 
 
 NUM_SUGGESTIONS = 4
-DEBUG = False
+DEBUG = True
+USE_WAII_CHART = False
 
 WAII_API_KEY = st.secrets["WAII_API_KEY"]
 WAII_DB_CONNECTION = st.secrets["WAII_DB_CONNECTION"]
@@ -37,16 +38,16 @@ if "state" not in st.session_state:
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {
-            "name": "Otto",
-            "text": "Here are some examples of questions I can answer:",
-            "suggestions": [
-                "Which of my workloads has the most critical vulnerabilities?",
-                "Which scripts trigger the most incidents?",
-                "Which CISA KEVs exist on my systems?",
-                "Which operating systems am I running?",
-            ],
-        }
+        # {
+        #     "name": "Otto",
+        #     "text": "Here are some examples of questions I can answer:",
+        #     "suggestions": [
+        #         "Which of my workloads has the most critical vulnerabilities?",
+        #         "Which scripts trigger the most incidents?",
+        #         "Which CISA KEVs exist on my systems?",
+        #         "Which operating systems am I running?",
+        #     ],
+        # }
     ]
 
 if "initial_question" not in st.session_state:
@@ -131,7 +132,8 @@ def chart_block(df):
 
 def ask(question):
     user_message = {"name": "user", "text": question}
-    st.session_state.messages.append(user_message)
+    render_message(user_message, persist=True)
+    # st.session_state.messages.append(user_message)
     response = WAII.Chat.chat_message(ChatRequest(ask=question, parent_uuid=st.session_state.prev_response_uuid))
     st.session_state.prev_response_uuid = response.chat_uuid
     ai_message = {
@@ -142,8 +144,9 @@ def ask(question):
         "chart": response.response_data.chart.chart_spec.plot if response.response_data.chart else None,
     }
     # Remove the suggestions from the previous message
-    st.session_state.messages = [msg for msg in st.session_state.messages if "suggestions" not in msg]
-    st.session_state.messages.append(ai_message)
+    # st.session_state.messages = [msg for msg in st.session_state.messages if "suggestions" not in msg]
+    # st.session_state.messages.append(ai_message)
+    render_message(ai_message, persist=True)
 
 
 def render_message(message, persist=False):
@@ -179,8 +182,9 @@ def render_message(message, persist=False):
                 st.expander("SQL Query", expanded=False).code(message["sql"], language="sql")
             if "data" in message and message["data"] is not None:
                 st.expander("Data", expanded=False).dataframe(df, use_container_width=True)
-            if "chart" in message and message["chart"]:
-                st.expander("Waii Chart Specification", expanded=False).code(message["chart"], language="python")
+            if USE_WAII_CHART:
+                if "chart" in message and message["chart"]:
+                    st.expander("Waii Chart Specification", expanded=False).code(message["chart"], language="python")
         if "suggestions" in message:
             for suggestion in message["suggestions"]:
                 st.button(suggestion, use_container_width=True, on_click=ask, args=(suggestion,), key=suggestion)
