@@ -17,7 +17,8 @@ dotenv.load_dotenv()
 
 NUM_SUGGESTIONS = 4
 DEBUG = True
-USE_WAII_CHART = False
+USE_WAII_CHART = True
+USE_AUTOCHART = True
 
 WAII_API_KEY = st.secrets["WAII_API_KEY"]
 WAII_DB_CONNECTION = st.secrets["WAII_DB_CONNECTION"]
@@ -27,7 +28,7 @@ WAII.Database.activate_connection(WAII_DB_CONNECTION)
 st.set_page_config(
     page_title="Chat with Otto",
     page_icon="🎱",
-    layout="wide",
+    # layout="wide",
 )
 
 st.logo("virsec_logo.svg")
@@ -115,10 +116,20 @@ def autoplot(df_, chart_type="bar"):
     return fig
 
 
-def chart_block(df):
+def chart_block(df, waii_chart_spec=None):
     plots = {chart_type: autoplot(df, chart_type) for chart_type in ["bar", "pie", "line"]}
+
     if any(plots.values()):
-        bar_chart_tab, pie_chart_tab, line_chart_tab = st.tabs(["Bar Chart", "Pie Chart", "Line Chart"])
+        if USE_WAII_CHART:
+            waii_chart_tab, bar_chart_tab, pie_chart_tab, line_chart_tab = st.tabs(
+                ["Waii Chart", "Bar Chart", "Pie Chart", "Line Chart"]
+            )
+            with waii_chart_tab:
+                if waii_chart_spec:
+                    exec(waii_chart_spec, {"df": df})
+        else:
+            bar_chart_tab, pie_chart_tab, line_chart_tab = st.tabs(["Bar Chart", "Pie Chart", "Line Chart"])
+
         with bar_chart_tab:
             if plots["bar"]:
                 st.plotly_chart(plots["bar"], use_container_width=True, key=f"bar_chart_{uuid.uuid4()}")
@@ -174,9 +185,9 @@ def render_message(message, persist=False):
                     st.dataframe(block[1], use_container_width=True)
                 elif block[0] == "chart":
                     includes_chart = True
-                    chart_block(df)
+                    chart_block(df, waii_chart_spec=(message["chart"] if "chart" in message else None))
         if not includes_chart and df is not None:
-            chart_block(df)
+            chart_block(df, waii_chart_spec=(message["chart"] if "chart" in message else None))
         if DEBUG:
             if "sql" in message and message["sql"] and ("sql", message["sql"]) not in blocks:
                 st.expander("SQL Query", expanded=False).code(message["sql"], language="sql")
