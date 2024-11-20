@@ -127,7 +127,10 @@ def chart_block(df, waii_chart_spec=None):
             )
             with waii_chart_tab:
                 if waii_chart_spec:
-                    exec(waii_chart_spec, {"df": df})
+                    try:
+                        exec(waii_chart_spec, {"df": df})
+                    except Exception as e:
+                        st.write(e)
         else:
             bar_chart_tab, pie_chart_tab, line_chart_tab = st.tabs(["Bar Chart", "Pie Chart", "Line Chart"])
 
