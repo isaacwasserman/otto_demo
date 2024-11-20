@@ -21,8 +21,9 @@ USE_WAII_CHART = True
 USE_AUTOCHART = True
 
 WAII_API_KEY = st.secrets["WAII_API_KEY"]
+WAII_API_URL = st.secrets["WAII_API_URL"]
 WAII_DB_CONNECTION = st.secrets["WAII_DB_CONNECTION"]
-WAII.initialize(url="https://sql.dev.waii.ai/api/", api_key=WAII_API_KEY)
+WAII.initialize(url=WAII_API_URL, api_key=WAII_API_KEY)
 WAII.Database.activate_connection(WAII_DB_CONNECTION)
 
 st.set_page_config(
