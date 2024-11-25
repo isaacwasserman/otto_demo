@@ -7,10 +7,12 @@ from auth_functions import user_logged_in
 from ui_utils import render_message, render_sidebar_tips, render_placeholder_image, render_auth_form, render_account_panel
 
 # Define constants
-dotenv.load_dotenv()
 WAII_API_KEY = st.secrets["WAII_API_KEY"]
 WAII_API_URL = st.secrets["WAII_API_URL"]
-DEBUG = True
+SNOWFLAKE_WAREHOUSE = st.secrets["SNOWFLAKE_WAREHOUSE"]
+SNOWFLAKE_DATABASE = st.secrets["SNOWFLAKE_DATABASE"]
+SNOWFLAKE_ACCOUNT = st.secrets["SNOWFLAKE_ACCOUNT"]
+SNOWFLAKE_USER = st.secrets["SNOWFLAKE_USER"]
 
 # Configure page
 st.set_page_config(page_title="Chat with Otto", page_icon="🎱")
@@ -29,9 +31,7 @@ def update_user_info():
 
 
 def initialize_waii():
-    waii_db_connection = (
-        f"snowflake://waii_user@usb22166.us-east-1/insight_db?role=waii_{st.session_state.tenant_id}_role&warehouse=insight_wh"
-    )
+    waii_db_connection = f"snowflake://{SNOWFLAKE_USER}@{SNOWFLAKE_ACCOUNT}/{SNOWFLAKE_DATABASE}?role=waii_{st.session_state.tenant_id}_role&warehouse={SNOWFLAKE_WAREHOUSE}"
     WAII.initialize(url=WAII_API_URL, api_key=WAII_API_KEY)
     WAII.Database.activate_connection(waii_db_connection)
 
