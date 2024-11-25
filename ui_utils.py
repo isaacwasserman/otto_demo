@@ -28,7 +28,7 @@ def render_auth_form():
 
 
 def render_account_panel():
-    with st.sidebar.container(border=True, height=150):
+    with st.sidebar.container(border=True, height=160):
         if "user_info" in st.session_state:
             st.markdown(
                 f"User: `{st.session_state.user_info['users'][0]['email']}`\n\nAccount: `{st.session_state.tenant_name}`"
@@ -126,13 +126,14 @@ def chart_block(df, waii_chart_spec=None):
             modified_chart_spec = add_background_and_corner_radius(waii_chart_spec)
             exec(modified_chart_spec, {"df": df})
         except Exception as e:
-            st.write(e)
+            print("Error rendering chart. This was the code:\n\n", modified_chart_spec, "\n\nThis was the error:", e)
+            # st.write(e)
 
 
 def render_message(message, persist=False):
     if persist:
         st.session_state.messages.append(message)
-    with st.chat_message(message["name"], avatar="otto_avatar.png" if message["name"] == "Otto" else None):
+    with st.chat_message(message["name"], avatar="bot_avatar.svg" if message["name"] == "Otto" else None):
         replacements = {}
         df = None
         includes_chart = False
@@ -165,9 +166,46 @@ def render_message(message, persist=False):
             st.expander("Waii Chart Specification", expanded=False).code(message["chart"], language="python")
 
 
+def render_placeholder_image(opacity=0.4, enforce_aspect_ratio=True):
+    with open("bot.svg", "rb") as f:
+        bot_svg = f.read()
+
+    # Edit bot_svg to add style
+    bot_svg = bot_svg.replace(b"<svg", b'<svg style="width: 70%; height: auto; object-fit: contain;"')
+    st.write(
+        f"""
+                <div style="width: 100%; {'aspect-ratio: 1 / 1;' if enforce_aspect_ratio else ''} display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; opacity: {opacity};">
+                    {bot_svg.decode()}
+                </div>
+                """,
+        unsafe_allow_html=True,
+    )
+
+
+import base64
+from pathlib import Path
+
+
+def img_to_bytes(img_path):
+    img_bytes = Path(img_path).read_bytes()
+    encoded = base64.b64encode(img_bytes).decode()
+    return encoded
+
+
+def img_to_html(img_path):
+    img_html = "<img src='data:image/png;base64,{}' class='img-fluid'>".format(img_to_bytes(img_path))
+    return img_html
+
+
 def render_sidebar_tips():
+    with open("bot-small.svg", "rb") as f:
+        bot_svg = f.read()
     st.sidebar.info(
-        """## Hi, I'm OTTO!
+        f"""
+
+![bot](data:image/svg+xml;base64,{base64.b64encode(bot_svg).decode()})
+
+## Hi, I'm OTTO!
         
 I'm your trusty, cybersecurity assistant, here to help you navigate your infrastructure, answer your questions, and provide actionable insights to keep your organization secure.
 
@@ -176,20 +214,4 @@ I'm your trusty, cybersecurity assistant, here to help you navigate your infrast
 - How can I improve my security posture?
 - What is my risk as a CISO?\n
         """
-    )
-
-
-def render_placeholder_image():
-    with open("bot.svg", "rb") as f:
-        bot_svg = f.read()
-
-    # Edit bot_svg to add style
-    bot_svg = bot_svg.replace(b"<svg", b'<svg style="width: 70%; height: auto; object-fit: contain;"')
-    st.write(
-        f"""
-                <div style="width: 100%; aspect-ratio: 1 / 1; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; opacity: 40%;">
-                    {bot_svg.decode()}
-                </div>
-                """,
-        unsafe_allow_html=True,
     )

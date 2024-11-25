@@ -3,8 +3,6 @@ import pandas as pd
 import streamlit as st
 from waii_sdk_py import WAII
 from waii_sdk_py.chat import ChatRequest
-from auth_functions import user_logged_in
-from ui_utils import render_message, render_sidebar_tips, render_placeholder_image, render_auth_form, render_account_panel
 
 # Define constants
 WAII_API_KEY = st.secrets["WAII_API_KEY"]
@@ -16,6 +14,10 @@ SNOWFLAKE_USER = st.secrets["SNOWFLAKE_USER"]
 
 # Configure page
 st.set_page_config(page_title="Chat with Otto", page_icon="🎱")
+
+from auth_functions import user_logged_in
+from ui_utils import render_message, render_sidebar_tips, render_placeholder_image, render_auth_form, render_account_panel
+
 st.logo("virsec_logo.svg")
 st.title("Meet OTTO")
 

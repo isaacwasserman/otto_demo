@@ -1,6 +1,12 @@
 import json
 import requests
 import streamlit as st
+from streamlit_cookies_controller import CookieController
+from cryptography.fernet import Fernet
+
+
+cookie_controller = CookieController()
+
 
 ## -------------------------------------------------------------------------------------------------
 ## Firebase Auth API -------------------------------------------------------------------------------
@@ -91,6 +97,11 @@ def sign_in(email: str, password: str) -> None:
         id_token = sign_in_with_email_and_password(email, password)["idToken"]
         st.session_state.id_token = id_token
 
+        # Encrypt id_token with private key and save to cookie
+        fernet = Fernet(st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"])
+        encrypted_id_token = fernet.encrypt(id_token.encode())
+        cookie_controller.set("encrypted_id_token", encrypted_id_token)
+
         # Get account information
         user_info = get_account_info(id_token)["users"][0]
 
@@ -157,6 +168,7 @@ def reset_password(email: str) -> None:
 
 
 def sign_out() -> None:
+    cookie_controller.remove("encrypted_id_token")
     st.session_state.clear()
     st.session_state.auth_success = "You have successfully signed out"
 
@@ -181,7 +193,13 @@ def delete_account(password: str) -> None:
 
 def user_logged_in():
     try:
-        if "id_token" not in st.session_state:
+        if "id_token" in st.session_state:
+            id_token = st.session_state.id_token
+        elif cookie_controller.get("encrypted_id_token"):
+            fernet = Fernet(st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"])
+            id_token = fernet.decrypt(cookie_controller.get("encrypted_id_token")).decode()
+            st.session_state.id_token = id_token
+        else:
             return False
         retrieved_user_info = get_account_info(st.session_state.id_token)
         if retrieved_user_info:
