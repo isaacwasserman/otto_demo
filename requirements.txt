@@ -4,6 +4,3 @@ plotly
 pandas
 python-dotenv
 pydantic
-streamlit-cookies-controller
-cryptography
-git+https://github.com/52g-studio/streamlit-cookies-manager

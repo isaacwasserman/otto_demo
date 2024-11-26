@@ -2,22 +2,7 @@ import json
 import requests
 import streamlit as st
 
-# from streamlit_cookies_controller import CookieController
-# from cryptography.fernet import Fernet
-from streamlit_cookies_manager import EncryptedCookieManager
-
-USE_COOKIES = False
-# cookie_controller = CookieController()
-cookies = EncryptedCookieManager(
-    # This prefix will get added to all your cookie names.
-    # This way you can run your app on Streamlit Cloud without cookie name clashes with other apps.
-    prefix="otto",
-    # You should really setup a long COOKIES_PASSWORD secret if you're running on Streamlit Cloud.
-    password=st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"],
-)
-if not cookies.ready():
-    # Wait for the component to load and send us current cookies.
-    st.stop()
+# USE_COOKIES = False
 
 
 ## -------------------------------------------------------------------------------------------------
@@ -114,7 +99,8 @@ def sign_in(email: str, password: str) -> None:
             # fernet = Fernet(st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"])
             # encrypted_id_token = fernet.encrypt(id_token.encode())
             # cookie_controller.set("encrypted_id_token", encrypted_id_token)
-            cookies["id_token"] = id_token
+            # cookies["id_token"] = id_token
+            pass
 
         # Get account information
         user_info = get_account_info(id_token)["users"][0]
@@ -183,7 +169,8 @@ def reset_password(email: str) -> None:
 
 def sign_out() -> None:
     if USE_COOKIES:
-        cookies["id_token"] = ""
+        # cookies["id_token"] = ""
+        pass
     st.session_state.clear()
     st.session_state.auth_success = "You have successfully signed out"
 
@@ -210,10 +197,10 @@ def user_logged_in():
     try:
         if "id_token" in st.session_state:
             id_token = st.session_state.id_token
-        elif USE_COOKIES and cookies.get("id_token"):
-            # fernet = Fernet(st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"])
-            # id_token = fernet.decrypt(cookie_controller.get("encrypted_id_token")).decode()
-            st.session_state.id_token = cookies["id_token"]
+        # elif USE_COOKIES and cookies.get("id_token"):
+        # fernet = Fernet(st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"])
+        # id_token = fernet.decrypt(cookie_controller.get("encrypted_id_token")).decode()
+        # st.session_state.id_token = cookies["id_token"]
         else:
             return False
         retrieved_user_info = get_account_info(st.session_state.id_token)
