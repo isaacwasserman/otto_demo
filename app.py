@@ -5,12 +5,13 @@ from waii_sdk_py import WAII
 from waii_sdk_py.chat import ChatRequest
 
 # Define constants
-WAII_API_KEY = st.secrets["WAII_API_KEY"]
-WAII_API_URL = st.secrets["WAII_API_URL"]
-SNOWFLAKE_WAREHOUSE = st.secrets["SNOWFLAKE_WAREHOUSE"]
-SNOWFLAKE_DATABASE = st.secrets["SNOWFLAKE_DATABASE"]
-SNOWFLAKE_ACCOUNT = st.secrets["SNOWFLAKE_ACCOUNT"]
-SNOWFLAKE_USER = st.secrets["SNOWFLAKE_USER"]
+ENV = st.secrets["ENV"]
+WAII_API_KEY = st.secrets[ENV]["WAII_API_KEY"]
+WAII_API_URL = st.secrets[ENV]["WAII_API_URL"]
+SNOWFLAKE_WAREHOUSE = st.secrets[ENV]["SNOWFLAKE_WAREHOUSE"]
+SNOWFLAKE_DATABASE = st.secrets[ENV]["SNOWFLAKE_DATABASE"]
+SNOWFLAKE_ACCOUNT = st.secrets[ENV]["SNOWFLAKE_ACCOUNT"]
+SNOWFLAKE_USER = st.secrets[ENV]["SNOWFLAKE_USER"]
 
 # Configure page
 st.set_page_config(page_title="Chat with Otto", page_icon="🎱")
@@ -28,12 +29,14 @@ if "user_info" not in st.session_state:
 
 def update_user_info():
     st.session_state.user_domain = st.session_state.user_info["users"][0]["email"].split("@")[1].lower()
-    st.session_state.tenant_name = st.secrets["TENANTS_BY_DOMAIN"][st.session_state.user_domain]["NAME"]
-    st.session_state.tenant_id = st.secrets["TENANTS_BY_DOMAIN"][st.session_state.user_domain]["TENANT_ID"]
+    st.session_state.tenant_name = st.secrets[ENV]["TENANTS_BY_DOMAIN"][st.session_state.user_domain]["NAME"]
+    st.session_state.tenant_id = st.secrets[ENV]["TENANTS_BY_DOMAIN"][st.session_state.user_domain]["TENANT_ID"]
+    st.session_state.tenant_role = st.secrets[ENV]["TENANTS_BY_DOMAIN"][st.session_state.user_domain]["ROLE"]
 
 
 def initialize_waii():
-    waii_db_connection = f"snowflake://{SNOWFLAKE_USER}@{SNOWFLAKE_ACCOUNT}/{SNOWFLAKE_DATABASE}?role=waii_{st.session_state.tenant_id}_role&warehouse={SNOWFLAKE_WAREHOUSE}"
+    waii_db_connection = f"snowflake://{SNOWFLAKE_USER}@{SNOWFLAKE_ACCOUNT}/{SNOWFLAKE_DATABASE}?role={st.session_state.tenant_role}&warehouse={SNOWFLAKE_WAREHOUSE}"
+    print(waii_db_connection)
     WAII.initialize(url=WAII_API_URL, api_key=WAII_API_KEY)
     WAII.Database.activate_connection(waii_db_connection)
 

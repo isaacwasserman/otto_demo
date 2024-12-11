@@ -207,7 +207,7 @@ def render_sidebar_tips():
 
 ## Hi, I'm OTTO!
         
-I'm your trusty, cybersecurity assistant, here to help you navigate your infrastructure, answer your questions, and provide actionable insights to keep your organization secure.
+I'm your trusty cybersecurity assistant, here to help you navigate your infrastructure, answer your questions, and provide actionable insights to keep your organization secure.
 
 ## Things you can ask me:
 - Which vulnerabilities should I be most concerned about?

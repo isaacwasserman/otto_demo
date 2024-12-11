@@ -9,10 +9,13 @@ import streamlit as st
 ## Firebase Auth API -------------------------------------------------------------------------------
 ## -------------------------------------------------------------------------------------------------
 
+ENV = st.secrets["ENV"]
+FIREBASE_WEB_API_KEY = st.secrets[ENV]["FIREBASE_WEB_API_KEY"]
+
 
 def sign_in_with_email_and_password(email, password):
     request_ref = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={0}".format(
-        st.secrets["FIREBASE_WEB_API_KEY"]
+        FIREBASE_WEB_API_KEY
     )
     headers = {"content-type": "application/json; charset=UTF-8"}
     data = json.dumps({"email": email, "password": password, "returnSecureToken": True})
@@ -23,7 +26,7 @@ def sign_in_with_email_and_password(email, password):
 
 def get_account_info(id_token):
     request_ref = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getAccountInfo?key={0}".format(
-        st.secrets["FIREBASE_WEB_API_KEY"]
+        FIREBASE_WEB_API_KEY
     )
     headers = {"content-type": "application/json; charset=UTF-8"}
     data = json.dumps({"idToken": id_token})
@@ -34,7 +37,7 @@ def get_account_info(id_token):
 
 def send_email_verification(id_token):
     request_ref = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getOobConfirmationCode?key={0}".format(
-        st.secrets["FIREBASE_WEB_API_KEY"]
+        FIREBASE_WEB_API_KEY
     )
     headers = {"content-type": "application/json; charset=UTF-8"}
     data = json.dumps({"requestType": "VERIFY_EMAIL", "idToken": id_token})
@@ -45,7 +48,7 @@ def send_email_verification(id_token):
 
 def send_password_reset_email(email):
     request_ref = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/getOobConfirmationCode?key={0}".format(
-        st.secrets["FIREBASE_WEB_API_KEY"]
+        FIREBASE_WEB_API_KEY
     )
     headers = {"content-type": "application/json; charset=UTF-8"}
     data = json.dumps({"requestType": "PASSWORD_RESET", "email": email})
@@ -56,7 +59,7 @@ def send_password_reset_email(email):
 
 def create_user_with_email_and_password(email, password):
     request_ref = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key={0}".format(
-        st.secrets["FIREBASE_WEB_API_KEY"]
+        FIREBASE_WEB_API_KEY
     )
     headers = {"content-type": "application/json; charset=UTF-8"}
     data = json.dumps({"email": email, "password": password, "returnSecureToken": True})
@@ -67,7 +70,7 @@ def create_user_with_email_and_password(email, password):
 
 def delete_user_account(id_token):
     request_ref = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/deleteAccount?key={0}".format(
-        st.secrets["FIREBASE_WEB_API_KEY"]
+        FIREBASE_WEB_API_KEY
     )
     headers = {"content-type": "application/json; charset=UTF-8"}
     data = json.dumps({"idToken": id_token})
@@ -94,13 +97,13 @@ def sign_in(email: str, password: str) -> None:
         id_token = sign_in_with_email_and_password(email, password)["idToken"]
         st.session_state.id_token = id_token
 
-        if USE_COOKIES:
-            # Encrypt id_token with private key and save to cookie
-            # fernet = Fernet(st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"])
-            # encrypted_id_token = fernet.encrypt(id_token.encode())
-            # cookie_controller.set("encrypted_id_token", encrypted_id_token)
-            # cookies["id_token"] = id_token
-            pass
+        # if USE_COOKIES:
+        # Encrypt id_token with private key and save to cookie
+        # fernet = Fernet(st.secrets["AUTH_TOKEN_ENCRYPTION_KEY"])
+        # encrypted_id_token = fernet.encrypt(id_token.encode())
+        # cookie_controller.set("encrypted_id_token", encrypted_id_token)
+        # cookies["id_token"] = id_token
+        # pass
 
         # Get account information
         user_info = get_account_info(id_token)["users"][0]
